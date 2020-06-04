@@ -1,0 +1,47 @@
+---
+
+- name: awx > organizations > check > Organization IDs
+  shell: tower-cli organization list --format id
+  register: awx_organization_cmd
+  changed_when: false
+
+- name: awx > organizations > declare > Organization IDs
+  set_fact:
+    awx_organization_all: "{{ awx_organization_cmd.stdout_lines }}"
+
+- name: awx > organizations > failure > Organization IDs
+  fail:
+    msg: "Organization ID not available."
+  when: not (awx_organization_all | default([]) | length)
+
+- name: awx > organiazation > Organization name check
+  block:
+    - name: awx > organizations > check > Organization name
+      shell: tower-cli organization get --name {{ awx_organization_name }} --format id
+      register: awx_organization_cmd
+      changed_when: false
+
+    - name: awx > organizations > declare > Organization ID
+      set_fact:
+        awx_organization_id: "{{ awx_organization_cmd.stdout }}"
+  when:
+    - awx_organization_name is defined
+    - awx_organization_name is not none
+
+- name: awx > organizations > declare > Organization ID
+  set_fact:
+    awx_organization_id: "{{ awx_organization_all | first }}"
+  when: awx_organization_id is undefined or awx_organization_id is none
+
+- name: awx > organizations > failure > Organization ID
+  fail:
+    msg: "Select one of the available awx_organization_id from [{{ awx_organization_all | join(', ') }}]."
+  when:
+    - awx_organization_id is defined
+    - awx_organization_id is not none
+    - (awx_organization_id | string) not in awx_organization_all
+
+- name: awx > organizations > debug > Organization ID
+  debug:
+    msg: "{{ awx_organization_id }}"
+    verbosity: 2
