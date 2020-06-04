@@ -1,0 +1,13 @@
+---
+
+# - AWX Organization -
+#
+#   Rules:
+#    1. Either variable is optional.
+#    2. When no variable is provided, ID of the first organization will be used.
+#    3. When either variable is provided, the variable value must match within the AWX Organizations list.
+#    4. When both variables are provided, name will be used to search for organization id.
+#
+
+awx_organization_id: ~
+awx_organization_name: ~
